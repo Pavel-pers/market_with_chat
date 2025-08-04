@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from chat.database import ChatBase
+from chat.libs.database import ChatBase
 
 class Message(ChatBase):
     __tablename__ = 'messages'
