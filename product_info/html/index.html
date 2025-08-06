@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>ppers products</title>
+    <style>
+        td {padding:5px;}
+        button{margin: 5px;}
+    </style>
+</head>
+<body>
+<h2>Список позиций</h2>
+<div>
+    <input type="hidden" id="productId" />
+    <p>
+        Название продукта:<br/>
+        <input id="productName" />
+    </p>
+    <p>
+        Цена продукта:<br />
+        <input id="productPrice" type="number" />
+    </p>
+    <p>
+        <button id="SaveProductBtn">Сохранить</button>
+        <button id="ResetProductBtn">Сбросить</button>
+    </p>
+</div>
+<table>
+    <thead><tr><th>Название</th><th>Цена</th><th></th></tr></thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script>
+    // Recieving all positions handler
+    async function getProducts() {
+        // Request creation
+        const response = await fetch("/products/", {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        });
+        // If request is succesful
+        if (response.ok === true) {
+            // parse data
+            const products = await response.json();
+            const rows = document.querySelector("tbody");
+            products.forEach(product => rows.append(row(product)));
+        } else {
+            const err = await response.json();
+            console.error(err.message);
+        }
+    }
+    // Get one product
+    async function updateProduct(id) {
+        const response = await fetch(`/products/${id}`, {
+            method: "GET",
+            headers: { "Accept": "application/json" }
+        });
+        if (response.ok === true) {
+            const product = await response.json();
+            document.getElementById("productId").value = product.id;
+            document.getElementById("productName").value = product.name;
+            document.getElementById("productPrice").value = product.price;
+        }
+        else {
+            const err = await response.json();
+            console.error(err.message);
+        }
+    }
+    // Product creation
+    async function createProduct(productName, productPrice) {
+
+        const response = await fetch("/products/new", {
+            method: "POST",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({
+                new_name: productName,
+                new_price: parseInt(productPrice, 10)
+            })
+        });
+        if (response.ok === true) {
+            const product = await response.json();
+            document.querySelector("tbody").append(row(product));
+        }
+        else {
+            const error = await response.json();
+            console.log(error.message);
+        }
+    }
+    // Product modify
+    async function editProduct(productId, productName, productPrice) {
+        const response = await fetch(`/products/${productId}`, {
+            method: "PUT",
+            headers: { "Accept": "application/json", "Content-Type": "application/json" },
+            body: JSON.stringify({
+                new_name: productName,
+                new_price: parseInt(productPrice, 10)
+            })
+        });
+        if (response.ok === true) {
+            const product = await response.json();
+            document.querySelector(`tr[data-rowid='${product.id}']`).replaceWith(row(product));
+        }
+        else {
+            const error = await response.json();
+            console.log(error.message);
+        }
+    }
+    // Product delete
+    async function deleteProduct(id) {
+        const response = await fetch(`/products/delete/${id}`, {
+            method: "DELETE",
+            headers: { "Accept": "application/json" }
+        });
+        if (response.ok === true) {
+            const product = await response.json();
+            document.querySelector(`tr[data-rowid='${product.id}']`).remove();
+        }
+        else {
+            const error = await response.json();
+            console.log(error.message);
+        }
+    }
+
+    // сброс данных формы после отправки
+    function reset() {
+        document.getElementById("productId").value =
+            document.getElementById("productName").value =
+                document.getElementById("productPrice").value = "";
+    }
+    // создание строки для таблицы
+    function row(product) {
+
+        const tr = document.createElement("tr");
+        tr.setAttribute("data-rowid", product.id);
+
+        const nameTd = document.createElement("td");
+        nameTd.append(product.name);
+        tr.append(nameTd);
+
+        const priceTd = document.createElement("td");
+        priceTd.append(product.price);
+        tr.append(priceTd);
+
+        const linksTd = document.createElement("td");
+
+        const editLink = document.createElement("button");
+        editLink.append("Изменить");
+        editLink.addEventListener("click", async() => await updateProduct(product.id));
+        linksTd.append(editLink);
+
+        const removeLink = document.createElement("button");
+        removeLink.append("Удалить");
+        removeLink.addEventListener("click", async () => await deleteProduct(product.id));
+
+        linksTd.append(removeLink);
+        tr.appendChild(linksTd);
+
+        return tr;
+    }
+    // сброс значений формы
+    document.getElementById("ResetProductBtn").addEventListener("click", () =>  reset());
+
+    // отправка формы
+    document.getElementById("SaveProductBtn").addEventListener("click", async () => {
+
+        const id = document.getElementById("productId").value;
+        const name = document.getElementById("productName").value;
+        const price = document.getElementById("productPrice").value;
+        if (id === "")
+            await createProduct(name, price);
+        else
+            await editProduct(id, name, price);
+        reset();
+    });
+
+    // загрузка пользователей
+    getProducts();
+</script>
+</body>
+</html>
