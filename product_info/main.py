@@ -31,7 +31,7 @@ async def main():
 @action_with_logging
 async def create_product(new_product: ProductChangeRequest,
                          session: Session = Depends(database.get_session)):
-    product_logger.debug(type(new_product))
+    product_logger.info('New product created: {0} {1}'.format(new_product.new_name, new_product.new_price))
     new_product = product.create_product_object(new_product.new_name, new_product.new_price)
     session.add(new_product)
     session.commit()
@@ -72,6 +72,7 @@ async def get_products(product_id: int, session: Session = Depends(database.get_
     if requested_product is None:
         raise HTTPException(status_code=404, detail="Product not found")
     else:
+        product_logger.info(f'deleting product {product_id}')
         session.delete(requested_product)
         session.commit()
         return ProductResponse(requested_product)
