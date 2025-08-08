@@ -1,0 +1,3 @@
+STORAGES_URL = None
+PRODUCTS_URL = None
+CART_URL = None
