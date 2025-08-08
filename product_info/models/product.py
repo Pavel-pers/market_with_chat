@@ -18,7 +18,7 @@ class Product(database.productBase):
         self.price = price
 
 
-class ProductResponse():
+class ProductResponse:
     def __init__(self, product):
         self.id = product.id
         self.name = product.name
