@@ -5,7 +5,7 @@ from fastapi import FastAPI, Body, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
-from client_cart.libs.logs import action_with_logging
+from libs.logs import action_with_logging
 from libs import database
 from models.clientCartPositionsRequest import ClientCartPositionsRequest
 from models.clientCartPositions import ClientCartPositions, ClientCartPositionsResponce

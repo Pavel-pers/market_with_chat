@@ -10,7 +10,7 @@ class ClientCartPositionsBase(DeclarativeBase): pass
 
 
 # startup init
-SQL_DATABASE_URL = "postgresql+psycopg2://postgres:postgres@localhost:5050/postgres"
+SQL_DATABASE_URL = os.environ.get("DATABASE_URL")
 engine = create_engine(SQL_DATABASE_URL)
 
 
