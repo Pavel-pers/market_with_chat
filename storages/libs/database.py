@@ -18,7 +18,7 @@ def get_session() -> Generator[Session, Any, None]:
         yield session
 
 
-def init_tables() -> None:
+def init_tables():
     """
     :param engine: engine of database
     :param Base: Base of classes that should be initialized
