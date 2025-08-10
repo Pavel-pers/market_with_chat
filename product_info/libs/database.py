@@ -1,3 +1,4 @@
+import os
 from typing import Annotated, Generator, Any
 from sqlalchemy.orm import DeclarativeBase, Session
 from sqlalchemy.exc import OperationalError
@@ -7,7 +8,7 @@ from fastapi import Depends
 class productBase(DeclarativeBase): pass
 
 # startup init
-SQL_DATABASE_URL = "postgresql://postgres:postgres@localhost:7070/postgres"
+SQL_DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(SQL_DATABASE_URL)
 
 def get_session() -> Generator[Session, Any, None]:

@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: market_app_db
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "7171:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d market_app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  storage:
+    build: ./storage/
+    container_name: storage
+    image: storage
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/market_app_db
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+
+  product_info:
+    build: ./product_info/
+    container_name: product_info
+    image: product_info
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/market_app_db
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
