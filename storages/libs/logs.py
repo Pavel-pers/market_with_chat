@@ -2,7 +2,7 @@ import logging
 import functools
 
 # set up logger
-storage_logger = logging.getLogger('storage')
+storage_logger = logging.getLogger('storages')
 handler = logging.FileHandler('logs/root.log', mode='a')
 formatter = logging.Formatter('[%(asctime)s](%(name)s)%(levelname)s:%(message)s', '%H:%M:%S')
 handler.setFormatter(formatter)

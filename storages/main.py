@@ -5,12 +5,14 @@ import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, Body
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+import requests
 
 from libs import database
 from libs.logs import storage_logger, action_with_logging
 from models.storage import Storage, StorageResponce, create_storage_object
 from models.product_quantity import ProductQuantity, ProductQuantityResponce
 from models.product_quantity_difference import ProductQuantityDifference
+from resources import constants
 
 
 @asynccontextmanager
@@ -25,7 +27,7 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/storages/create")
 @action_with_logging
 async def create_storage(new_storage_name: str, session: Session = Depends(database.get_session)):
-    storage_logger.info("Creating new storage %s", new_storage_name)
+    storage_logger.info("Creating new storages %s", new_storage_name)
     new_storage = create_storage_object(new_storage_name)
     session.add(new_storage)
     session.commit()
@@ -46,10 +48,10 @@ async def delete_storage(storage_id: int, session: Session = Depends(database.ge
 
         for product in products_in_storage:
             product = product[0]
-            storage_logger.info(f"Deleting product {product.product_id} from storage {storage_id}")
+            storage_logger.info(f"Deleting product {product.product_id} from storages {storage_id}")
             session.delete(product)
 
-        storage_logger.info(f"Deleting storage {storage_id}")
+        storage_logger.info(f"Deleting storages {storage_id}")
         session.delete(requested_storage)
         session.commit()
         return StorageResponce(requested_storage)
@@ -74,6 +76,8 @@ async def update_storage_info(storage_id: int, products_difference: list[Product
         products_in_storage = []
         products_to_create = []
         for product_diff in products_difference:
+            if not is_product_in_db(product_diff.product_id, session):
+                raise HTTPException(status_code=404, detail="Product not found")
             product_row: ProductQuantity | None = session.execute(select(ProductQuantity).
             where(ProductQuantity.storage_id == storage_id).
             where(
@@ -130,6 +134,10 @@ async def get_product_quantity_by_storage(storage_id: int, session: Session = De
     products_responce = list(map(
         lambda item: ProductQuantityResponce(item[0]), products))
     return products_responce
+
+
+def is_product_in_db(product_id: int, session: Session):
+    return requests.get(constants.PRODUCTS_URL + f'/products/{product_id}').ok
 
 
 if __name__ == "__main__":

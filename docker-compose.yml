@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   db:
     image: postgres:latest
@@ -16,9 +15,9 @@ services:
       retries: 10
 
   storage:
-    build: ./storage/
-    container_name: storage
-    image: storage
+    build: ./storages/
+    container_name: storages
+    image: storages
     ports:
       - "8000:8000"
     environment:
@@ -33,9 +32,9 @@ services:
         condition: service_healthy
 
   product_info:
-    build: ./product_info/
-    container_name: product_info
-    image: product_info
+    build: ./products/
+    container_name: products
+    image: products
     ports:
       - "8001:8001"
     environment:
