@@ -47,3 +47,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  client_cart:
+    build: ./client_cart/
+    container_name: client_cart
+    image: client_cart
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/market_app_db
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy

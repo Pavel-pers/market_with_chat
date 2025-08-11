@@ -121,23 +121,28 @@ def update_storage_info_one_product(storage_id: int, product_id: int, difference
 @app.get("/storages/{storage_id}")
 @action_with_logging
 async def get_product_quantity_by_storage(storage_id: int, session: Session = Depends(database.get_session)):
-    products_in_storage = session.execute(select(ProductQuantity).where(
-        cast("ColumnElement[bool]",
-             ProductQuantity.storage_id == storage_id)
-    ))
+    requested_storage = session.get(Storage, storage_id)
+    if requested_storage is None:
+        raise HTTPException(status_code=404, detail="Storage not found")
+    else:
+        products_in_storage = session.execute(select(ProductQuantity).where(
+            cast("ColumnElement[bool]",
+                 ProductQuantity.storage_id == storage_id)
+        ))
 
-    products = session.execute(select(ProductQuantity).where(
-        cast("ColumnElement[bool]",
-             ProductQuantity.storage_id == storage_id)
-    )).all()
+        products = session.execute(select(ProductQuantity).where(
+            cast("ColumnElement[bool]",
+                 ProductQuantity.storage_id == storage_id)
+        )).all()
 
-    products_responce = list(map(
-        lambda item: ProductQuantityResponce(item[0]), products))
-    return products_responce
+        products_responce = list(map(
+            lambda item: ProductQuantityResponce(item[0]), products))
+        return products_responce
 
 
 def is_product_in_db(product_id: int, session: Session):
-    return requests.get(constants.PRODUCTS_URL + f'/products/{product_id}').ok
+    print(requests.get(constants.PRODUCTS_URL + f'/products/{product_id}'))
+    return requests.get(constants.PRODUCTS_URL + f'/products/{product_id}').status_code != 404
 
 
 if __name__ == "__main__":
