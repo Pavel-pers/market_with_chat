@@ -38,3 +38,5 @@ In project 3-4(?) microservices, and 4 databse tables.
    (handle root page, has index.html, work with another microservices and combines data from them, for answer clients about cart information, and hold operations like buying product from cart)
 
     wotks on port 8003
+
+   Also all microservices has logs, in ./microservice_name/logs
